@@ -2,7 +2,7 @@ import torch.utils.data as data
 
 from os import listdir
 from os.path import join
-from PIL import Image
+from PIL import Image, ImageFilter
 
 
 def is_image_file(filename):
@@ -10,10 +10,11 @@ def is_image_file(filename):
 
 
 def load_img(filepath):
-    img = Image.open(filepath).convert('YCbCr')
-    y, _, _ = img.split()
-    return y
+    img = Image.open(filepath).convert('RGB')
 
+    #y, _, _ = img.split()
+    #return y
+    return img
 
 class DatasetFromFolder(data.Dataset):
     def __init__(self, image_dir, input_transform=None, target_transform=None):
@@ -27,6 +28,8 @@ class DatasetFromFolder(data.Dataset):
         input = load_img(self.image_filenames[index])
         target = input.copy()
         if self.input_transform:
+            input = input.filter(ImageFilter.GaussianBlur(2))
+
             input = self.input_transform(input)
         if self.target_transform:
             target = self.target_transform(target)

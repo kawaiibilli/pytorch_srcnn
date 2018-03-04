@@ -7,9 +7,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
-from model import Net
 from srcnn_data import get_training_set, get_test_set
-from srcnn_model import *
+from srcnn_model import SRCNN
 
 parser = argparse.ArgumentParser(description='PyTorch Super Res Example')
 parser.add_argument('--upscale_factor', type=int, required=True, help="super resolution upscale factor")
@@ -33,7 +32,7 @@ torch.manual_seed(opt.seed)
 if use_cuda:
     torch.cuda.manual_seed(opt.seed)
 
-print "loading datasets ----------->"
+
 train_set = get_training_set(opt.upscale_factor)
 test_set = get_test_set(opt.upscale_factor)
 training_data_loader = DataLoader(dataset=train_set, num_workers=opt.threads, batch_size=opt.batch_size, shuffle=True)
@@ -60,7 +59,11 @@ def train(epoch):
             target = target.cuda()
 
         optimizer.zero_grad()
-        loss = criterion(model(input), target)
+        print ("input shape = " , input.shape)
+        print ("target shape = ", target.shape)
+        model_out = srcnn(input)
+        print ("model_out shape =" , model_out.shape)
+        loss = criterion(model_out, target)
         epoch_loss += loss.data[0]
         loss.backward()
         optimizer.step()
@@ -80,7 +83,7 @@ def test():
             input = input.cuda()
             target = target.cuda()
 
-        prediction = model(input)
+        prediction = srcnn(input)
         mse = criterion(prediction, target)
         psnr = 10 * log10(1 / mse.data[0])
         avg_psnr += psnr
@@ -89,7 +92,7 @@ def test():
 
 def checkpoint(epoch):
     model_out_path = "model_epoch_{}.pth".format(epoch)
-    torch.save(model, model_out_path)
+    torch.save(srcnn, model_out_path)
     print("Checkpoint saved to {}".format(model_out_path))
 
 for epoch in range(1, opt.epochs + 1):
