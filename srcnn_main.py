@@ -59,10 +59,10 @@ def train(epoch):
             target = target.cuda()
 
         optimizer.zero_grad()
-        print ("input shape = " , input.shape)
-        print ("target shape = ", target.shape)
+        #print ("input shape = " , input.shape)
+        #print ("target shape = ", target.shape)
         model_out = srcnn(input)
-        print ("model_out shape =" , model_out.shape)
+        #print ("model_out shape =" , model_out.shape)
         loss = criterion(model_out, target)
         epoch_loss += loss.data[0]
         loss.backward()
@@ -98,5 +98,6 @@ def checkpoint(epoch):
 for epoch in range(1, opt.epochs + 1):
     train(epoch)
     test()
-    checkpoint(epoch)
+    if(epoch%10==0):
+        checkpoint(epoch)
 
