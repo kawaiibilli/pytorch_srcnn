@@ -1,3 +1,6 @@
+#SRCNN
+Implemented with PyTorch
+
 ##Sample Usage
 	 python srcnn_run.py --input_image <input_image> --scale_factor 3.0 --model <model_name> --cuda --output_filename <output_filename>
 
